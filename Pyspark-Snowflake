@@ -1,0 +1,52 @@
+
+# Data Pipile ETL and Data optimisation using Databricks Snowflake
+
+from pyspark.sql.window import window
+from pyspark.sql.functions import rank
+
+# connecting to Azure Datalake Storage
+
+df= spark.read.format.load("abfss://containername@storageaccount.dfs.core.windows.net/EmpFile.csv")
+
+# selecting Employee details, Grouping by Dept
+
+df.select("empname","Dept","Salary").show()
+
+df.groupby("Dept").show() 
+
+ # Grouping Emp Dataframe by Dept and salary greater than 10k 
+
+df.filter("salary"> 10000).groupby("DEPT").show()  
+
+# ranking Emp by Salaries
+
+windowsal=windowpartitionby("Dept").orderby("salary")  
+df=df.withcolumn("rank",rank().over(windowsal))
+
+df.show()
+
+# writing to parquet file
+
+df.write.format(parquet)
+
+# repatitioning
+
+df.repartition(4)
+
+df.show()
+
+# Connecting to Snowflake
+
+connectdf= {
+
+  "sfUser":snowid.east-us-2.azure.snowflakecomputing.com",
+  "sfUser": "accountadmin",
+  "sfPassword": "user@123!",
+  "sfDatabase": "DEMO",
+  "sfSchema": "PUBLIC",
+  "sfWarehouse": "WF"
+}
+# Writing the dataset to Snowflake table
+
+df.write.format("snowflake").options(**connectdf)option("dbtable","Emp").mode("overwrite").save()
+df.show()
